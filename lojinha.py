@@ -6,7 +6,7 @@ from collections import Counter
 CATALOGO = {
     "1": {"nome": "ECOBAG", "dinheiro": 30.00, "cartao": 35.00},
     "2": {"nome": "PRESILHAS", "dinheiro": 15.00, "cartao": 20.00},
-    "3": {"nome": "BLUSAS: SEND ME E I BELONG JESUS", "dinheiro": 65.00, "cartao": 70.00},
+    "3": {"nome": "BLUSAS", "dinheiro": 65.00, "cartao": 70.00},
     "4": {"nome": "STICKERS (1 unidade)", "dinheiro": 2.00, "cartao": 2.00},
     "5": {"nome": "STICKERS (3 unidades)", "dinheiro": 5.00, "cartao": 5.00},
     "6": {"nome": "BLUSAS: EXIT E AD1", "dinheiro": 45.00, "cartao": 50.00},

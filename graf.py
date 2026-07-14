@@ -15,6 +15,7 @@ def main():
         # Dicionários para contar
         contagem_itens = defaultdict(int)
         valor_arrecadado = defaultdict(float)
+        valor_por_pagamento = defaultdict(float)
         
         # Verifica o nome da coluna
         coluna_item = 'Item' if 'Item' in df.columns else 'Itens'
@@ -44,6 +45,7 @@ def main():
                 if nome in mapa_precos:
                     preco = mapa_precos[nome][chave_preco]
                     valor_arrecadado[nome] += preco * qtd
+                    valor_por_pagamento[pagamento] += preco * qtd
                     
         if not contagem_itens:
             print("Nenhum item vendido encontrado no registro.")
@@ -52,9 +54,10 @@ def main():
         # Cria as séries do pandas
         serie_qtd = pd.Series(contagem_itens).sort_values(ascending=True)
         serie_valor = pd.Series(valor_arrecadado).sort_values(ascending=True)
+        serie_pagamento = pd.Series(valor_por_pagamento).sort_values(ascending=True)
         
-        # Configuração da figura (2 subplots lado a lado)
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 8))
+        # Configuração da figura (3 subplots lado a lado)
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 8))
         
         # Gráfico 1: Quantidade de Itens Vendidos
         serie_qtd.plot(kind='barh', ax=ax1, color='#4C72B0', edgecolor='black')
@@ -73,6 +76,16 @@ def main():
         ax2.grid(axis='x', linestyle='--', alpha=0.7)
         for i, v in enumerate(serie_valor):
             ax2.text(v + 1.0, i, f'R$ {v:.2f}', color='black', va='center', fontweight='bold')
+            
+        # Gráfico 3: Arrecadação por Forma de Pagamento
+        serie_pagamento.plot(kind='bar', ax=ax3, color=['#E6842A', '#8E44AD'], edgecolor='black')
+        ax3.set_title('Forma de pagamento(R$)', fontsize=14, fontweight='bold', pad=15)
+        ax3.set_xlabel('')
+        ax3.set_ylabel('Valor Total (R$)', fontsize=12)
+        ax3.grid(axis='y', linestyle='--', alpha=0.7)
+        ax3.tick_params(axis='x', rotation=0)
+        for i, v in enumerate(serie_pagamento):
+            ax3.text(i, v + (serie_pagamento.max() * 0.02), f'R$ {v:.2f}', color='black', ha='center', fontweight='bold')
             
         plt.tight_layout()
         print("Abrindo os gráficos...")
