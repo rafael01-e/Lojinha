@@ -127,7 +127,7 @@ def registrar_venda():
         print(f"Total: R$ {valor_total:.2f}")
         
         input("\nPressione ENTER para nova venda...")
-
+3
 if __name__ == "__main__":
     inicializar_arquivo()
     registrar_venda()
