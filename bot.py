@@ -5,8 +5,19 @@ import os
 from collections import Counter
 from lojinha import CATALOGO, ARQUIVO_VENDAS
 
-# Token fornecido pelo usuário
-TOKEN = '8962776872:AAG6SkwPzD_ItRBsWqfLoAB9qxKaoH0uGzo'
+# Carrega variáveis do arquivo .env se existir
+if os.path.exists('.env'):
+    with open('.env') as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                key, val = line.split('=', 1)
+                os.environ[key.strip()] = val.strip()
+
+TOKEN = os.environ.get('TELEGRAM_TOKEN')
+if not TOKEN:
+    raise ValueError("Token do Telegram não encontrado! Defina TELEGRAM_TOKEN no arquivo .env")
+
 bot = telebot.TeleBot(TOKEN)
 
 # Armazena o carrinho temporário de cada usuário: {chat_id: ['1', '2', '1']}
@@ -18,8 +29,9 @@ def get_menu_text():
         texto += f"/{key} - {item['nome']} (Dinheiro: R${item['dinheiro']:.2f} | Cartão: R${item['cartao']:.2f})\n"
     texto += "\n*Comandos:*\n"
     texto += "/carrinho - Ver itens atuais\n"
-    texto += "/finalizar 1 - Pagar c/ Dinheiro/PIX\n"
-    texto += "/finalizar 2 - Pagar c/ Cartão\n"
+    texto += "/d - Pagar c/ Dinheiro\n"
+    texto += "/p - Pagar c/ PIX\n"
+    texto += "/c - Pagar c/ Cartão\n"
     texto += "/cancelar - Esvaziar carrinho\n"
     texto += "/estornar - Apagar a última venda salva\n"
     return texto
@@ -40,7 +52,7 @@ def add_item_by_number(message):
     carrinhos[chat_id].append(item_id)
     nome = CATALOGO[item_id]['nome']
     
-    bot.reply_to(message, f"✅ *{nome}* adicionado ao carrinho!\n\nUse /carrinho para ver ou /finalizar para fechar a compra.", parse_mode='Markdown')
+    bot.reply_to(message, f"✅ *{nome}* adicionado ao carrinho!\n\nUse /carrinho para ver ou /d, /p, /c para fechar a compra.", parse_mode='Markdown')
 
 @bot.message_handler(commands=['add'])
 def add_item_by_command(message):
@@ -60,7 +72,7 @@ def add_item_by_command(message):
         
     carrinhos[chat_id].append(item_id)
     nome = CATALOGO[item_id]['nome']
-    bot.reply_to(message, f"✅ *{nome}* adicionado ao carrinho!\n\nUse /carrinho para ver ou /finalizar para fechar a compra.", parse_mode='Markdown')
+    bot.reply_to(message, f"✅ *{nome}* adicionado ao carrinho!\n\nUse /carrinho para ver ou /d, /p, /c para fechar a compra.", parse_mode='Markdown')
 
 @bot.message_handler(commands=['carrinho'])
 def ver_carrinho(message):
@@ -85,7 +97,7 @@ def ver_carrinho(message):
         
     texto += f"\n💰 *Total (Dinheiro/PIX):* R$ {total_dinheiro:.2f}"
     texto += f"\n💳 *Total (Cartão):* R$ {total_cartao:.2f}\n"
-    texto += "\nPara finalizar: /finalizar 1 (Dinheiro) ou /finalizar 2 (Cartão)\nPara cancelar: /cancelar"
+    texto += "\nPara finalizar: /d (Dinheiro), /p (PIX) ou /c (Cartão)\nPara cancelar: /cancelar"
     
     bot.reply_to(message, texto, parse_mode='Markdown')
 
@@ -98,7 +110,7 @@ def cancelar_compra(message):
     else:
         bot.reply_to(message, "Seu carrinho já estava vazio.")
 
-@bot.message_handler(commands=['finalizar'])
+@bot.message_handler(commands=['p', 'd', 'c'])
 def finalizar_compra(message):
     chat_id = message.chat.id
     carrinho = carrinhos.get(chat_id, [])
@@ -107,14 +119,19 @@ def finalizar_compra(message):
         bot.reply_to(message, "Seu carrinho está vazio! Adicione itens primeiro.")
         return
         
-    partes = message.text.split()
-    if len(partes) < 2 or partes[1] not in ["1", "2"]:
-        bot.reply_to(message, "❌ *Forma de pagamento não informada ou inválida!*\nUse:\n/finalizar 1 (para Dinheiro/PIX)\n/finalizar 2 (para Cartão)", parse_mode='Markdown')
+    comando = message.text.split()[0].lower()
+    
+    if comando == "/d":
+        forma_pagamento = "Dinheiro"
+        chave_preco = "dinheiro"
+    elif comando == "/p":
+        forma_pagamento = "PIX"
+        chave_preco = "dinheiro"
+    elif comando == "/c":
+        forma_pagamento = "Cartão"
+        chave_preco = "cartao"
+    else:
         return
-        
-    opcao_pagamento = partes[1]
-    forma_pagamento = "Dinheiro/PIX" if opcao_pagamento == "1" else "Cartão"
-    chave_preco = "dinheiro" if opcao_pagamento == "1" else "cartao"
     
     valor_total = 0.0
     nomes_itens = []

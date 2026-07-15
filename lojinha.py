@@ -11,7 +11,7 @@ CATALOGO = {
     "5": {"nome": "STICKERS (3 unidades)", "dinheiro": 5.00, "cartao": 5.00},
     "6": {"nome": "BLUSAS: EXIT E AD1", "dinheiro": 45.00, "cartao": 50.00},
     "7": {"nome": "LAÇOS", "dinheiro": 15.00, "cartao": 20.00},
-    "8": {"nome": "COMBO: 3 CAMISAS", "dinheiro": 185.00, "cartao": 185.00},
+    "8": {"nome": "COMBO: 3 CAMISAS", "dinheiro": 160.00, "cartao": 165.00},
     "9": {"nome": "COMBO: ECOBAG, PRESILHA E 1 CAMISA", "dinheiro": 100.00, "cartao": 100.00},
 }
 
@@ -80,8 +80,9 @@ def registrar_venda():
         # Fechar a compra
         print("\n" + "="*30)
         print("💳 FINALIZAR COMPRA")
-        print("[1] Dinheiro / PIX")
-        print("[2] Cartão")
+        print("[1] Dinheiro")
+        print("[2] PIX")
+        print("[3] Cartão")
         print("[0] Cancelar compra")
         
         pagamento_opcao = input("Selecione a forma de pagamento: ").strip()
@@ -94,9 +95,12 @@ def registrar_venda():
         chave_preco = ""
         
         if pagamento_opcao == "1":
-            forma_pagamento = "Dinheiro/PIX"
+            forma_pagamento = "Dinheiro"
             chave_preco = "dinheiro"
         elif pagamento_opcao == "2":
+            forma_pagamento = "PIX"
+            chave_preco = "dinheiro"
+        elif pagamento_opcao == "3":
             forma_pagamento = "Cartão"
             chave_preco = "cartao"
         else:
